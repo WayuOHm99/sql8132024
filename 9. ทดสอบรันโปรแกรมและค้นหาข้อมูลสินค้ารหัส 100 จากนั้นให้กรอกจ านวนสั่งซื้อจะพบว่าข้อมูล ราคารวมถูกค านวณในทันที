@@ -36,13 +36,13 @@ Public Class FormOrderProduct
 
     Private Sub txtBoxProCount_TextChanged(sender As Object, e As EventArgs) Handles txtBoxProCount.TextChanged
         If txtBoxProCount.Text.Trim <> "" Then
-            Dim unitPrice As Integer
+            Dim unitPrice As Decimal
             Dim proCount As Integer
 
             ' ตรวจสอบและแปลงค่า Text ใน txtBoxUnitPrice และ txtBoxProCount เป็นตัวเลข
-            If Integer.TryParse(txtBoxUnitPrice.Text, unitPrice) AndAlso Integer.TryParse(txtBoxProCount.Text, proCount) Then
+            If Decimal.TryParse(txtBoxUnitPrice.Text, unitPrice) AndAlso Integer.TryParse(txtBoxProCount.Text, proCount) Then
                 ' คำนวณราคาทั้งหมดและแสดงใน txtBoxTotalPrice
-                txtBoxTotalPrice.Text = (unitPrice * proCount).ToString()
+                txtBoxTotalPrice.Text = (unitPrice * proCount).ToString("F2")
             Else
                 ' กรณีไม่สามารถแปลงค่าได้ ให้ตั้งค่า txtBoxTotalPrice เป็นค่าว่าง
                 txtBoxTotalPrice.Text = ""
@@ -51,3 +51,25 @@ Public Class FormOrderProduct
             txtBoxTotalPrice.Text = ""
         End If
     End Sub
+
+    Private Sub btnAddOrder_Click(sender As Object, e As EventArgs) Handles btnAddOrder.Click
+        ' Retrieve values from TextBox controls
+        Dim proID As String = txtBoxSearchProductID.Text
+        Dim proName As String = txtBoxProductName.Text
+        Dim proPrice As String = txtBoxUnitPrice.Text
+        Dim proCount As String = txtBoxProCount.Text
+        Dim totalPrice As String = txtBoxTotalPrice.Text
+
+        ' Validate the input values to ensure correctness
+        If String.IsNullOrEmpty(proID) OrElse String.IsNullOrEmpty(proName) OrElse
+           String.IsNullOrEmpty(proPrice) OrElse String.IsNullOrEmpty(proCount) OrElse
+           String.IsNullOrEmpty(totalPrice) Then
+            MessageBox.Show("กรุณากรอกข้อมูลให้ครบถ้วน")
+            Exit Sub
+        End If
+
+        ' Ensure the correct columns are being populated
+        Dim row As String() = {proID, proName, proPrice, proCount, totalPrice}
+        dgvOrderList.Rows.Add(row)
+    End Sub
+End Class
