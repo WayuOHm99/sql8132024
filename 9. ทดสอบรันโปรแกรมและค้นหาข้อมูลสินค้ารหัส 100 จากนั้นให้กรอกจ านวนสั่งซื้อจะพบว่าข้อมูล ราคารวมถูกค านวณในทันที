@@ -1,0 +1,53 @@
+Imports System.Data.SqlClient
+
+Public Class FormOrderProduct
+    ' กำหนด connectionString (ใส่ค่าที่แท้จริง)
+    Private connectionString As String = "Data Source=lab245ac\DATABASE70;Initial Catalog=dbsutstore_B6623593;Integrated Security=True;"
+
+    Private Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
+        ' รับค่าจาก TextBox สำหรับค้นหา
+        Dim idSearch As String = txtBoxSearchProductID.Text
+
+        ' สร้าง SQL Connection
+        Using sqlConnection As New SqlConnection(connectionString)
+            ' กำหนดคำสั่ง SQL เพื่อค้นหาข้อมูลจากฐานข้อมูล
+            Dim sql As String = "SELECT TOP 1 * FROM PRODUCT WHERE proID = @proID"
+
+            ' สร้าง SQL Command
+            Using cmd As New SqlCommand(sql, sqlConnection)
+                ' เพิ่มพารามิเตอร์เพื่อป้องกัน SQL Injection
+                cmd.Parameters.AddWithValue("@proID", idSearch)
+
+                ' เปิดการเชื่อมต่อฐานข้อมูล
+                sqlConnection.Open()
+
+                ' ทำการ Execute คำสั่ง SQL
+                Using sqlReader As SqlDataReader = cmd.ExecuteReader()
+                    ' อ่านข้อมูลจากฐานข้อมูล
+                    If sqlReader.Read() Then
+                        ' กำหนดค่าที่ได้จากฐานข้อมูลไปยัง TextBox ต่างๆ
+                        txtBoxProductName.Text = sqlReader("proName").ToString()
+                        txtBoxUnitPrice.Text = sqlReader("proPrice").ToString()
+                    End If
+                End Using
+            End Using
+        End Using
+    End Sub
+
+    Private Sub txtBoxProCount_TextChanged(sender As Object, e As EventArgs) Handles txtBoxProCount.TextChanged
+        If txtBoxProCount.Text.Trim <> "" Then
+            Dim unitPrice As Integer
+            Dim proCount As Integer
+
+            ' ตรวจสอบและแปลงค่า Text ใน txtBoxUnitPrice และ txtBoxProCount เป็นตัวเลข
+            If Integer.TryParse(txtBoxUnitPrice.Text, unitPrice) AndAlso Integer.TryParse(txtBoxProCount.Text, proCount) Then
+                ' คำนวณราคาทั้งหมดและแสดงใน txtBoxTotalPrice
+                txtBoxTotalPrice.Text = (unitPrice * proCount).ToString()
+            Else
+                ' กรณีไม่สามารถแปลงค่าได้ ให้ตั้งค่า txtBoxTotalPrice เป็นค่าว่าง
+                txtBoxTotalPrice.Text = ""
+            End If
+        Else
+            txtBoxTotalPrice.Text = ""
+        End If
+    End Sub
