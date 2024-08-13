@@ -72,4 +72,38 @@ Public Class FormOrderProduct
         Dim row As String() = {proID, proName, proPrice, proCount, totalPrice}
         dgvOrderList.Rows.Add(row)
     End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        If dgvOrderList.CurrentRow IsNot Nothing Then
+            dgvOrderList.Rows.RemoveAt(dgvOrderList.CurrentRow.Index)
+        End If
+    End Sub
+
+    Private Sub btnInsertOrder_Click(sender As Object, e As EventArgs) Handles btnInsertOrder.Click
+        ' สร้าง SQL Connection
+        Using sqlConnection As New SqlConnection(connectionString)
+            sqlConnection.Open()
+            Using sqlCmd As SqlCommand = sqlConnection.CreateCommand()
+                ' Loop through DataGridView rows
+                For Each row As DataGridViewRow In dgvOrderList.Rows
+                    If row.IsNewRow Then
+                        Continue For ' Skip the new row placeholder
+                    End If
+
+                    Dim proID As String = row.Cells(0).Value.ToString()
+                    Dim proCount As Integer = Convert.ToInt32(row.Cells(3).Value)
+
+                    ' SQL Command with parameters
+                    sqlCmd.CommandText = "INSERT INTO ORDERS (proID, proCount) VALUES (@proID, @proCount)"
+                    sqlCmd.Parameters.Clear() ' Clear parameters to avoid duplication
+                    sqlCmd.Parameters.AddWithValue("@proID", proID)
+                    sqlCmd.Parameters.AddWithValue("@proCount", proCount)
+
+                    sqlCmd.ExecuteNonQuery()
+                Next
+            End Using
+        End Using
+
+        MessageBox.Show("Order has been successfully inserted.")
+    End Sub
 End Class
